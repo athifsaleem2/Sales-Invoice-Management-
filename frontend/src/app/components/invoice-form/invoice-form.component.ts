@@ -56,9 +56,14 @@ export class InvoiceFormComponent implements OnInit {
     this.loading = true;
     this.invoiceService.getById(id).subscribe({
       next: (invoice) => {
+        const localDate = new Date(invoice.date);
+        const formattedDate = localDate.getFullYear() + '-' + 
+                              String(localDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(localDate.getDate()).padStart(2, '0');
+
         this.invoiceForm.patchValue({
           customerName: invoice.customerName,
-          date: new Date(invoice.date).toISOString().substring(0, 10)
+          date: formattedDate
         });
 
         this.items.clear();
