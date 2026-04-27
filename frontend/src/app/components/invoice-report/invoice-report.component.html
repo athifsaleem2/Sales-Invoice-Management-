@@ -1,0 +1,82 @@
+<div class="print:m-0 print:p-0">
+  <div class="flex justify-between items-center mb-6 print:hidden">
+    <h2 class="text-2xl font-bold text-gray-800">Invoice Report</h2>
+    <button (click)="printReport()" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+      </svg>
+      Print Report
+    </button>
+  </div>
+
+  <!-- Hidden in print, visible on screen -->
+  <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 print:hidden">
+    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Filter Report</h3>
+    <div class="flex flex-col sm:flex-row gap-4 items-end">
+      <div class="flex-1 w-full">
+        <label for="filterDate" class="block text-xs font-medium text-gray-500 mb-1">Date</label>
+        <input type="date" id="filterDate" [(ngModel)]="filterDate" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border">
+      </div>
+      <div class="flex-1 w-full">
+        <label for="filterInvoiceNumber" class="block text-xs font-medium text-gray-500 mb-1">Invoice Number</label>
+        <input type="text" id="filterInvoiceNumber" [(ngModel)]="filterInvoiceNumber" placeholder="e.g. 26INV0001" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border">
+      </div>
+      <div class="flex gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+        <button (click)="applyFilters()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200">
+          Apply
+        </button>
+        <button (click)="clearFilters()" class="flex-1 sm:flex-none bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Header (Visible only when printing) -->
+  <div class="hidden print:block mb-8 text-center">
+    <h1 class="text-3xl font-bold text-gray-900">Sales Invoice Report</h1>
+    <p class="text-gray-500 mt-2">Generated on {{ currentDate | date:'medium' }}</p>
+    <div class="mt-4 flex justify-between text-sm text-gray-600 border-b border-gray-200 pb-4">
+      <span><strong>Filtered By Date:</strong> {{ filterDate || 'All Time' }}</span>
+      <span><strong>Filtered By Invoice No:</strong> {{ filterInvoiceNumber || 'All' }}</span>
+    </div>
+  </div>
+
+  <!-- Report Data -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 print:shadow-none print:border-none print:rounded-none overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50 print:bg-gray-100">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Invoice No</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Customer Name</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Amount</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngIf="loading">
+          <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">Loading report data...</td>
+        </tr>
+        <tr *ngIf="!loading && invoices.length === 0">
+          <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No invoices match the selected criteria.</td>
+        </tr>
+        <tr *ngFor="let invoice of invoices" class="hover:bg-gray-50 transition-colors duration-150">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ invoice.invoiceNumber }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ invoice.customerName }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ invoice.date | date:'mediumDate' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 font-semibold">{{ invoice.totalAmount | currency:'INR' }}</td>
+        </tr>
+      </tbody>
+      <tfoot class="bg-gray-50 print:bg-gray-100 border-t-2 border-gray-200">
+        <tr>
+          <td colspan="3" class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900 uppercase">
+            Total Report Amount:
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-lg font-bold text-blue-600 print:text-black">
+            {{ totalReportAmount | currency:'INR' }}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

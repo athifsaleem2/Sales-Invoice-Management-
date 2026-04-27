@@ -1,0 +1,127 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800 tracking-tight">{{ isEditMode ? 'Update Invoice' : 'New Sales Invoice' }}</h1>
+      <p class="text-sm text-slate-500 font-medium mt-1">{{ isEditMode ? 'Modify existing document' : 'Register a new transaction' }}</p>
+    </div>
+    <a routerLink="/invoices" class="text-xs font-bold text-slate-500 uppercase tracking-widest hover:text-slate-800 transition-colors">
+      &larr; Back to records
+    </a>
+  </div>
+
+  <div *ngIf="submitSuccess" class="mb-8 bg-emerald-50 border border-emerald-200 p-4 rounded-md">
+    <div class="flex">
+      <svg class="h-5 w-5 text-emerald-400 mr-3" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      <p class="text-sm font-bold text-emerald-800 uppercase tracking-wider">Document Saved. Redirecting...</p>
+    </div>
+  </div>
+
+  <div *ngIf="submitError" class="mb-8 bg-rose-50 border border-rose-200 p-4 rounded-md">
+    <div class="flex">
+      <svg class="h-5 w-5 text-rose-400 mr-3" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      <p class="text-sm font-bold text-rose-800 uppercase tracking-wider">{{ submitError }}</p>
+    </div>
+  </div>
+
+  <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()" class="space-y-8">
+    <!-- Header Section -->
+    <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="customerName" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Customer Name</label>
+        <input type="text" id="customerName" formControlName="customerName" 
+               class="w-full bg-white border border-slate-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+               placeholder="e.g. Acme Corp">
+        <p *ngIf="invoiceForm.get('customerName')?.invalid && invoiceForm.get('customerName')?.touched" class="mt-2 text-xs font-bold text-rose-500 uppercase">Required Field</p>
+      </div>
+
+      <div>
+        <label for="date" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Invoice Date</label>
+        <input type="date" id="date" formControlName="date" 
+               class="w-full bg-white border border-slate-300 rounded-md py-2 px-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+      </div>
+    </div>
+
+    <!-- Items Section -->
+    <div>
+      <div class="flex justify-between items-end mb-4 px-2">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-widest">Line Items</h2>
+        <button type="button" (click)="addItem()" class="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors">
+          + Add New Item
+        </button>
+      </div>
+
+      <div class="border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+        <div formArrayName="items" class="min-w-[800px]">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Product / Service</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Quantity</th>
+                <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-44">Unit Price</th>
+                <th class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-48">Line Total</th>
+                <th class="px-4 py-3 w-16"></th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-slate-200">
+              <tr *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-4">
+                  <input type="text" formControlName="productName" placeholder="Enter product name..." 
+                         class="w-full bg-slate-50 border border-slate-200 rounded-md py-2 px-3 text-sm focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all outline-none">
+                </td>
+                <td class="px-4 py-4">
+                  <input type="number" formControlName="quantity" min="0.01" step="0.01"
+                         class="w-full bg-slate-50 border border-slate-200 rounded-md py-2 px-3 text-sm focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all outline-none text-center">
+                </td>
+                <td class="px-4 py-4">
+                  <div class="relative">
+                    <span class="absolute left-3 top-2 text-slate-400 text-xs font-bold">₹</span>
+                    <input type="number" formControlName="price" min="0.01" step="0.01"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-md py-2 pl-7 pr-3 text-sm focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all outline-none">
+                  </div>
+                </td>
+                <td class="px-4 py-4 text-right font-bold text-slate-900 text-sm">
+                  {{ calculateItemTotal(i) | currency:'INR' }}
+                </td>
+                <td class="px-4 py-4 text-center">
+                  <button type="button" (click)="removeItem(i)" [disabled]="items.length === 1" 
+                          class="text-slate-300 hover:text-rose-600 disabled:opacity-0 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p *ngIf="items.invalid && invoiceForm.touched" class="mt-4 text-xs font-bold text-rose-500 uppercase px-2 text-right">Verification Failed: All lines must have data.</p>
+    </div>
+
+    <!-- Summary Footer -->
+    <div class="bg-slate-800 rounded-lg p-8 shadow-lg flex flex-col md:flex-row justify-between items-center text-white">
+      <div class="mb-4 md:mb-0">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Final Transaction Total</span>
+        <span class="text-4xl font-extrabold tracking-tighter text-indigo-400">{{ grandTotal | currency:'INR' }}</span>
+      </div>
+      <div class="flex space-x-4 w-full md:w-auto">
+        <button type="button" routerLink="/invoices" 
+                class="flex-1 md:flex-none px-6 py-3 border border-slate-600 rounded-md text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:border-white transition-all">
+          Discard
+        </button>
+        <button type="submit" [disabled]="loading" 
+                class="flex-1 md:flex-none px-10 py-3 bg-indigo-500 rounded-md text-xs font-bold uppercase tracking-widest text-white hover:bg-indigo-400 shadow-xl shadow-indigo-900/20 disabled:opacity-50 transition-all flex items-center justify-center">
+          <svg *ngIf="loading" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ loading ? 'Processing...' : 'Finalize & Save' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

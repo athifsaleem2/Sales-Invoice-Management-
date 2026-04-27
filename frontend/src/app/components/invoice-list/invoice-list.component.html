@@ -1,0 +1,71 @@
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Invoice Overview</h1>
+    <p class="text-sm text-slate-500 font-medium mt-1">Manage and track your customer billing activity.</p>
+  </div>
+  <a routerLink="/invoices/create" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-bold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+    </svg>
+    Create New
+  </a>
+</div>
+
+<div class="overflow-hidden border border-slate-200 rounded-lg shadow-sm">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Reference No</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Client Name</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Issued Date</th>
+        <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Total Amount</th>
+        <th scope="col" class="relative px-6 py-3">
+          <span class="sr-only">Actions</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-slate-200">
+      <tr *ngIf="loading">
+        <td colspan="5" class="px-6 py-12 text-center">
+          <div class="flex justify-center items-center">
+            <svg class="animate-spin h-5 w-5 text-indigo-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-sm font-medium text-slate-400">Loading records...</span>
+          </div>
+        </td>
+      </tr>
+      <tr *ngIf="!loading && invoices.length === 0">
+        <td colspan="5" class="px-6 py-12 text-center text-sm text-slate-400 font-medium">No records found.</td>
+      </tr>
+      <tr *ngFor="let invoice of invoices" class="hover:bg-slate-50 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{{ invoice.invoiceNumber }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium">{{ invoice.customerName }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-medium">{{ invoice.date | date:'mediumDate' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-slate-900">{{ invoice.totalAmount | currency:'INR' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-right text-xs font-bold uppercase tracking-widest">
+          <a [routerLink]="['/invoices/edit', invoice.id]" class="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors">Edit</a>
+          <button (click)="deleteInvoice(invoice.id)" class="text-red-600 hover:text-red-900 transition-colors">Remove</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Professional Pagination -->
+<div class="flex items-center justify-between mt-6 bg-slate-50 border border-slate-200 rounded-lg px-6 py-3" *ngIf="totalCount > 0">
+  <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">
+    Page {{ pageNumber }} of {{ totalPages }}
+  </div>
+  <div class="flex space-x-2">
+    <button (click)="prevPage()" [disabled]="pageNumber === 1" 
+            class="px-4 py-2 border border-slate-300 rounded-md text-xs font-bold uppercase tracking-widest text-slate-700 bg-white hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+      Prev
+    </button>
+    <button (click)="nextPage()" [disabled]="pageNumber >= totalPages" 
+            class="px-4 py-2 border border-slate-300 rounded-md text-xs font-bold uppercase tracking-widest text-slate-700 bg-white hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+      Next
+    </button>
+  </div>
+</div>
